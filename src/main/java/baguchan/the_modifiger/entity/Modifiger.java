@@ -30,7 +30,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Optional;
 
 public class Modifiger extends AbstractIllager {
-    private static final String[] STRUCTURE_LOCATIONS = new String[]{"the_modifiger:spawner_1", "the_modifiger:arrow_spawner", "the_modifiger:spawner_2"};
+    private static final String[] STRUCTURE_LOCATIONS = new String[]{"the_modifiger:spawner_1", "the_modifiger:arrow_spawner"};
 
     private Optional<BlockPos> buildingPos = Optional.empty();
     private ResourceLocation buildingStructureName;

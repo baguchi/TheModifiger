@@ -40,8 +40,8 @@ public abstract class BaseIllagerSpawner {
     private SpawnData nextSpawnData;
     private double spin;
     private double oSpin;
-    private int minSpawnDelay = 10;
-    private int maxSpawnDelay = 20;
+    private int minSpawnDelay = 400;
+    private int maxSpawnDelay = 600;
     private int spawnCount = 4;
     @Nullable
     private Entity displayEntity;
@@ -281,14 +281,6 @@ public abstract class BaseIllagerSpawner {
     }
 
     public abstract void broadcastEvent(Level var1, BlockPos var2, int var3);
-
-    public double getSpin() {
-        return this.spin;
-    }
-
-    public double getoSpin() {
-        return this.oSpin;
-    }
 
     @Nullable
     public Entity getSpawnerEntity() {

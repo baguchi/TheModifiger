@@ -63,7 +63,7 @@ public class ConstructGoal extends Goal {
         if (this.mob.getBuildCount() < 3 && this.mob.getBuildCooldown() <= 0) {
             if (this.mob.getBuildingPos().isEmpty() && this.mob.hasActiveRaid()) {
                 if (this.mob.level() instanceof ServerLevel serverLevel && serverLevel.isCloseToVillage(this.mob.blockPosition(), 3) && !serverLevel.isVillage(this.mob.blockPosition())) {
-                    this.mob.setBuildCooldown(400 + this.mob.getRandom().nextInt(400));
+                    this.mob.setBuildCooldown(600 + this.mob.getRandom().nextInt(600));
                     this.mob.setBuildingPos(Optional.of(this.mob.blockPosition()));
                 }
             }
@@ -146,7 +146,6 @@ public class ConstructGoal extends Goal {
                 if (--this.buildingTick < 0) {
                     if (currentBlockPos != null) {
 
-                        if (blockPos.get().distSqr(mob.blockPosition()) < 32F) {
                             if (isReplaceable(serverLevel.getBlockState(currentBlockPos), serverLevel, mob)) {
                                 if (blockState != null && !blockState.isAir() && blockState.getFluidState().isEmpty()) {
                                     SoundType soundType = blockState.getSoundType();
@@ -207,8 +206,6 @@ public class ConstructGoal extends Goal {
 
                 }
                 this.mob.getNavigation().moveTo(blockPos.get().getX(), blockPos.get().getY(), blockPos.get().getZ(), this.speedMultiplier);
-
-            }
         }
         this.mob.setBuildingStep(this.step);
     }
