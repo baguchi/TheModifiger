@@ -31,6 +31,6 @@ public class TheModifiger {
 
     private void commonSetup(final FMLCommonSetupEvent event)
     {
-		Raid.RaiderType.create("modifiger", ModEntityRegistry.MODIFIGER.get(), new int[]{0, 0, 1, 1, 2, 2, 2, 3});
+		Raid.RaiderType.create("modifiger", ModEntityRegistry.MODIFIGER.get(), new int[]{0, 0, 0, 1, 1, 2, 2, 2});
     }
 }

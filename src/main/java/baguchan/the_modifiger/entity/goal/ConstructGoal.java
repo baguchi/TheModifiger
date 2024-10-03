@@ -60,9 +60,9 @@ public class ConstructGoal extends Goal {
     }
 
     public boolean canUse() {
-        if (this.mob.getBuildCount() < 3 && this.mob.getBuildCooldown() <= 0) {
+        if (this.mob.getBuildCount() < 3 && this.mob.getTarget() != null && this.mob.getBuildCooldown() <= 0) {
             if (this.mob.getBuildingPos().isEmpty() && this.mob.hasActiveRaid()) {
-                if (this.mob.level() instanceof ServerLevel serverLevel && serverLevel.isCloseToVillage(this.mob.blockPosition(), 3) && !serverLevel.isVillage(this.mob.blockPosition())) {
+                if (this.mob.level() instanceof ServerLevel serverLevel && serverLevel.isCloseToVillage(this.mob.blockPosition(), 2)) {
                     this.mob.setBuildCooldown(600 + this.mob.getRandom().nextInt(600));
                     this.mob.setBuildingPos(Optional.of(this.mob.blockPosition()));
                 }
@@ -145,8 +145,7 @@ public class ConstructGoal extends Goal {
 
                 if (--this.buildingTick < 0) {
                     if (currentBlockPos != null) {
-
-                            if (isReplaceable(serverLevel.getBlockState(currentBlockPos), serverLevel, mob)) {
+                        if (isReplaceable(serverLevel.getBlockState(currentBlockPos), serverLevel, mob)) {
                                 if (blockState != null && !blockState.isAir() && blockState.getFluidState().isEmpty()) {
                                     SoundType soundType = blockState.getSoundType();
                                     serverLevel.playSound(null, currentBlockPos, soundType.getPlaceSound(), SoundSource.BLOCKS, soundType.getVolume(), blockState.getSoundType().getPitch());
@@ -201,11 +200,12 @@ public class ConstructGoal extends Goal {
                                 currentBlockPos = null;
                             }
                         }
-                    }
                     this.buildingTick = 1;
 
                 }
                 this.mob.getNavigation().moveTo(blockPos.get().getX(), blockPos.get().getY(), blockPos.get().getZ(), this.speedMultiplier);
+
+            }
         }
         this.mob.setBuildingStep(this.step);
     }
