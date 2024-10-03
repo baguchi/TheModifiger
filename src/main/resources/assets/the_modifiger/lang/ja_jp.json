@@ -1,0 +1,8 @@
+{
+  "block.the_modifiger.illagers_spawner": "イリジャーのスポナー",
+  "block.the_modifiger.arrow_spawner": "矢のスポナー",
+  "block.the_modifiger.arrow_spawner.desc1": "矢で右クリックする",
+  "block.the_modifiger.arrow_spawner.desc2": "スポーンする矢を決める",
+  "item.the_modifiger.modifiger_spawn_egg": "改変者のスポーンエッグ",
+  "entity.the_modifiger.modifiger": "改変者"
+}

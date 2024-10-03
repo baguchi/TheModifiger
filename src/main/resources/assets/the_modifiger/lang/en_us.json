@@ -1,0 +1,8 @@
+{
+  "block.the_modifiger.illagers_spawner": "Illagers Spawner",
+  "block.the_modifiger.arrow_spawner": "Arrow Spawner",
+  "block.the_modifiger.arrow_spawner.desc1": "Interact with Arrow",
+  "block.the_modifiger.arrow_spawner.desc2": "Set Spawn Arrow",
+  "item.the_modifiger.modifiger_spawn_egg": "Modifiger Spawn Egg",
+  "entity.the_modifiger.modifiger": "Modifiger"
+}
