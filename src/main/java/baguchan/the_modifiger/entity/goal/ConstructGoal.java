@@ -48,6 +48,7 @@ public class ConstructGoal extends Goal {
 
     private int step;
     private int buildingTick = 4;
+    private int cooldown = 4;
 
 
     public ConstructGoal(Modifiger p_25919_, String[] structures, float speedMultiplier) {
@@ -59,10 +60,13 @@ public class ConstructGoal extends Goal {
     }
 
     public boolean canUse() {
-        if(this.mob.getBuildingPos().isEmpty() && this.mob.hasActiveRaid()){
-        if(this.mob.level() instanceof ServerLevel serverLevel && serverLevel.isCloseToVillage(this.mob.blockPosition(), 3) && !serverLevel.isVillage(this.mob.blockPosition())){
-            this.mob.setBuildingPos(Optional.of(this.mob.blockPosition()));
-        }
+        if (this.mob.getBuildCount() < 3 && this.mob.getBuildCooldown() <= 0) {
+            if (this.mob.getBuildingPos().isEmpty() && this.mob.hasActiveRaid()) {
+                if (this.mob.level() instanceof ServerLevel serverLevel && serverLevel.isCloseToVillage(this.mob.blockPosition(), 3) && !serverLevel.isVillage(this.mob.blockPosition())) {
+                    this.mob.setBuildCooldown(400 + this.mob.getRandom().nextInt(400));
+                    this.mob.setBuildingPos(Optional.of(this.mob.blockPosition()));
+                }
+            }
         }
 
 
@@ -216,6 +220,7 @@ public class ConstructGoal extends Goal {
             this.mob.setBuildingPos(Optional.empty());
             this.mob.setBuildingStructureName(null);
             this.mob.setBuildingStep(0);
+            this.mob.setBuildCount(this.mob.getBuildCount() + 1);
         }
         this.mob.setPose(Pose.STANDING);
     }

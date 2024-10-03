@@ -13,7 +13,10 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.util.random.SimpleWeightedRandomList;
 import net.minecraft.util.random.WeightedEntry;
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
@@ -46,7 +49,7 @@ public abstract class ArrowSpawner {
     @Nullable
     private Entity displayEntity;
     private int maxNearbyEntities = 6;
-    private int spawnRange = 5;
+    private int spawnRange = 4;
 
     public ArrowSpawner() {
     }
@@ -75,7 +78,7 @@ public abstract class ArrowSpawner {
 
     public void serverTick(ServerLevel p_151312_, BlockPos p_151313_) {
 
-        LivingEntity living = p_151312_.getNearestEntity(LivingEntity.class, TargetingConditions.DEFAULT.selector(test -> test instanceof Player || test instanceof AbstractVillager || test.getType() == EntityType.IRON_GOLEM), null, p_151313_.getX(), p_151313_.getY(), p_151313_.getZ(), (new AABB((double) p_151313_.getX(), (double) p_151313_.getY(), (double) p_151313_.getZ(), (double) (p_151313_.getX() + 1), (double) (p_151313_.getY() + 1), (double) (p_151313_.getZ() + 1))).inflate((double) 32));
+        LivingEntity living = p_151312_.getNearestEntity(LivingEntity.class, TargetingConditions.DEFAULT.selector(test -> test instanceof Player || test instanceof AbstractVillager || test.getType() == EntityType.IRON_GOLEM), null, p_151313_.getX(), p_151313_.getY(), p_151313_.getZ(), (new AABB((double) p_151313_.getX(), (double) p_151313_.getY(), (double) p_151313_.getZ(), (double) (p_151313_.getX() + 1), (double) (p_151313_.getY() + 1), (double) (p_151313_.getZ() + 1))).inflate((double) 20));
 
         if(living != null) {
             if (this.spawnDelay == -1) {
@@ -108,7 +111,7 @@ public abstract class ArrowSpawner {
                     ListTag listtag = compoundtag.getList("Pos", 6);
                     int j = listtag.size();
                     double d0 = j >= 1 ? listtag.getDouble(0) : (double) p_151313_.getX() + (randomsource.nextDouble() - randomsource.nextDouble()) * (double) this.spawnRange + 0.5;
-                    double d1 = j >= 2 ? listtag.getDouble(1) : (double) (p_151313_.getY() + randomsource.nextInt(3) - 1);
+                    double d1 = j >= 2 ? listtag.getDouble(1) : (double) (p_151313_.getY() + randomsource.nextInt(3) + 1);
                     double d2 = j >= 3 ? listtag.getDouble(2) : (double) p_151313_.getZ() + (randomsource.nextDouble() - randomsource.nextDouble()) * (double) this.spawnRange + 0.5;
                     if (p_151312_.noCollision(((EntityType) optional.get()).getAABB(d0, d1, d2))) {
                         label105:

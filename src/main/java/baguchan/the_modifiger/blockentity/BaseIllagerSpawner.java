@@ -14,8 +14,10 @@ import net.minecraft.util.random.SimpleWeightedRandomList;
 import net.minecraft.util.random.WeightedEntry;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.targeting.TargetingConditions;
+import net.minecraft.world.entity.npc.AbstractVillager;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.SpawnData;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.gameevent.GameEvent;
@@ -72,6 +74,10 @@ public abstract class BaseIllagerSpawner {
     }
 
     public void serverTick(ServerLevel p_151312_, BlockPos p_151313_) {
+
+        LivingEntity living = p_151312_.getNearestEntity(LivingEntity.class, TargetingConditions.DEFAULT.selector(test -> test instanceof Player || test instanceof AbstractVillager || test.getType() == EntityType.IRON_GOLEM), null, p_151313_.getX(), p_151313_.getY(), p_151313_.getZ(), (new AABB((double) p_151313_.getX(), (double) p_151313_.getY(), (double) p_151313_.getZ(), (double) (p_151313_.getX() + 1), (double) (p_151313_.getY() + 1), (double) (p_151313_.getZ() + 1))).inflate((double) 16));
+
+        if (living != null) {
             if (this.spawnDelay == -1) {
                 this.delay(p_151312_, p_151313_);
             }
@@ -84,7 +90,7 @@ public abstract class BaseIllagerSpawner {
                 SpawnData spawndata = this.getOrCreateNextSpawnData(p_151312_, randomsource, p_151313_);
                 int i = 0;
 
-                while(true) {
+                while (true) {
                     if (i >= this.spawnCount) {
                         if (flag) {
                             this.delay(p_151312_, p_151313_);
@@ -101,17 +107,18 @@ public abstract class BaseIllagerSpawner {
 
                     ListTag listtag = compoundtag.getList("Pos", 6);
                     int j = listtag.size();
-                    double d0 = j >= 1 ? listtag.getDouble(0) : (double)p_151313_.getX() + (randomsource.nextDouble() - randomsource.nextDouble()) * (double)this.spawnRange + 0.5;
-                    double d1 = j >= 2 ? listtag.getDouble(1) : (double)(p_151313_.getY() + randomsource.nextInt(3) - 1);
-                    double d2 = j >= 3 ? listtag.getDouble(2) : (double)p_151313_.getZ() + (randomsource.nextDouble() - randomsource.nextDouble()) * (double)this.spawnRange + 0.5;
-                    if (p_151312_.noCollision(((EntityType)optional.get()).getAABB(d0, d1, d2))) {
-                        label105: {
+                    double d0 = j >= 1 ? listtag.getDouble(0) : (double) p_151313_.getX() + (randomsource.nextDouble() - randomsource.nextDouble()) * (double) this.spawnRange + 0.5;
+                    double d1 = j >= 2 ? listtag.getDouble(1) : (double) (p_151313_.getY() + randomsource.nextInt(3) - 1);
+                    double d2 = j >= 3 ? listtag.getDouble(2) : (double) p_151313_.getZ() + (randomsource.nextDouble() - randomsource.nextDouble()) * (double) this.spawnRange + 0.5;
+                    if (p_151312_.noCollision(((EntityType) optional.get()).getAABB(d0, d1, d2))) {
+                        label105:
+                        {
                             BlockPos blockpos = BlockPos.containing(d0, d1, d2);
                             if (spawndata.getCustomSpawnRules().isPresent()) {
-                                if (!((EntityType)optional.get()).getCategory().isFriendly() && p_151312_.getDifficulty() == Difficulty.PEACEFUL) {
+                                if (!((EntityType) optional.get()).getCategory().isFriendly() && p_151312_.getDifficulty() == Difficulty.PEACEFUL) {
                                     break label105;
                                 }
-                            } else if (!SpawnPlacements.checkSpawnRules((EntityType)optional.get(), p_151312_, MobSpawnType.SPAWNER, blockpos, p_151312_.getRandom())) {
+                            } else if (!SpawnPlacements.checkSpawnRules((EntityType) optional.get(), p_151312_, MobSpawnType.SPAWNER, blockpos, p_151312_.getRandom())) {
                                 break label105;
                             }
 
@@ -124,7 +131,7 @@ public abstract class BaseIllagerSpawner {
                                 return;
                             }
 
-                            int k = p_151312_.getEntitiesOfClass(entity.getClass(), (new AABB((double)p_151313_.getX(), (double)p_151313_.getY(), (double)p_151313_.getZ(), (double)(p_151313_.getX() + 1), (double)(p_151313_.getY() + 1), (double)(p_151313_.getZ() + 1))).inflate((double)this.spawnRange)).size();
+                            int k = p_151312_.getEntitiesOfClass(entity.getClass(), (new AABB((double) p_151313_.getX(), (double) p_151313_.getY(), (double) p_151313_.getZ(), (double) (p_151313_.getX() + 1), (double) (p_151313_.getY() + 1), (double) (p_151313_.getZ() + 1))).inflate((double) this.spawnRange)).size();
                             if (k >= this.maxNearbyEntities) {
                                 this.delay(p_151312_, p_151313_);
                                 return;
@@ -132,14 +139,14 @@ public abstract class BaseIllagerSpawner {
 
                             entity.moveTo(entity.getX(), entity.getY(), entity.getZ(), randomsource.nextFloat() * 360.0F, 0.0F);
                             if (entity instanceof Mob) {
-                                Mob mob = (Mob)entity;
+                                Mob mob = (Mob) entity;
                                 if (!ForgeEventFactory.checkSpawnPositionSpawner(mob, p_151312_, MobSpawnType.SPAWNER, spawndata, null)) {
                                     break label105;
                                 }
 
-                                MobSpawnEvent.FinalizeSpawn event = ForgeEventFactory.onFinalizeSpawnSpawner(mob, p_151312_, p_151312_.getCurrentDifficultyAt(entity.blockPosition()), (SpawnGroupData)null, compoundtag, null);
+                                MobSpawnEvent.FinalizeSpawn event = ForgeEventFactory.onFinalizeSpawnSpawner(mob, p_151312_, p_151312_.getCurrentDifficultyAt(entity.blockPosition()), (SpawnGroupData) null, compoundtag, null);
                                 if (event != null && spawndata.getEntityToSpawn().size() == 1 && spawndata.getEntityToSpawn().contains("id", 8)) {
-                                    ((Mob)entity).finalizeSpawn(p_151312_, event.getDifficulty(), event.getSpawnType(), event.getSpawnData(), event.getSpawnTag());
+                                    ((Mob) entity).finalizeSpawn(p_151312_, event.getDifficulty(), event.getSpawnType(), event.getSpawnData(), event.getSpawnTag());
                                 }
                             }
 
@@ -151,7 +158,7 @@ public abstract class BaseIllagerSpawner {
                             p_151312_.levelEvent(2004, p_151313_, 0);
                             p_151312_.gameEvent(entity, GameEvent.ENTITY_PLACE, blockpos);
                             if (entity instanceof Mob) {
-                                ((Mob)entity).spawnAnim();
+                                ((Mob) entity).spawnAnim();
                             }
 
                             flag = true;
@@ -161,6 +168,7 @@ public abstract class BaseIllagerSpawner {
                     ++i;
                 }
             }
+        }
     }
 
     private void delay(Level p_151351_, BlockPos p_151352_) {

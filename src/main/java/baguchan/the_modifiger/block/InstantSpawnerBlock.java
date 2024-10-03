@@ -19,7 +19,9 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.RenderShape;
-import net.minecraft.world.level.block.entity.*;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
@@ -80,6 +82,6 @@ public class InstantSpawnerBlock extends BaseEntityBlock {
 
     @Override
     public @Nullable <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level p_153212_, BlockState p_153213_, BlockEntityType<T> p_153214_) {
-        return p_153212_.isClientSide() ? createTickerHelper(p_153214_, ModBlockEntitys.ILLAGERS_SPAWNER.get(), IllagersSpawnerBlockEntity::clientTick) : null;
+        return p_153212_.isClientSide() ? createTickerHelper(p_153214_, ModBlockEntitys.ILLAGERS_SPAWNER.get(), IllagersSpawnerBlockEntity::clientTick) : createTickerHelper(p_153214_, ModBlockEntitys.ILLAGERS_SPAWNER.get(), IllagersSpawnerBlockEntity::serverTick);
     }
 }

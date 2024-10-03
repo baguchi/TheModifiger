@@ -3,6 +3,7 @@ package baguchan.the_modifiger.client;
 import baguchan.the_modifiger.TheModifiger;
 import baguchan.the_modifiger.client.model.ModifigerModel;
 import baguchan.the_modifiger.client.render.ModifigerRenderer;
+import baguchan.the_modifiger.client.render.blockentity.ArrowSpawnerRenderer;
 import baguchan.the_modifiger.client.render.blockentity.IllagersSpawnerRenderer;
 import baguchan.the_modifiger.registry.ModBlockEntitys;
 import baguchan.the_modifiger.registry.ModEntityRegistry;
@@ -19,6 +20,7 @@ public class ClientRenderingRegistry {
 	public static void registerEntityRenders(EntityRenderersEvent.RegisterRenderers event) {
 		event.registerEntityRenderer(ModEntityRegistry.MODIFIGER.get(), ModifigerRenderer::new);
 		event.registerBlockEntityRenderer(ModBlockEntitys.ILLAGERS_SPAWNER.get(), IllagersSpawnerRenderer::new);
+		event.registerBlockEntityRenderer(ModBlockEntitys.ARROW_SPAWNER.get(), ArrowSpawnerRenderer::new);
 	}
 
 	@SubscribeEvent

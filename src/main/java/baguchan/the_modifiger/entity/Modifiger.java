@@ -1,7 +1,6 @@
 package baguchan.the_modifiger.entity;
 
 import baguchan.the_modifiger.entity.goal.ConstructGoal;
-import baguchan.the_modifiger.entity.goal.MakeSpawningGoal;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
@@ -31,7 +30,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Optional;
 
 public class Modifiger extends AbstractIllager {
-    private static final String[] STRUCTURE_LOCATIONS = new String[]{"the_modifiger:spawner_1"};
+    private static final String[] STRUCTURE_LOCATIONS = new String[]{"the_modifiger:spawner_1", "the_modifiger:arrow_spawner", "the_modifiger:spawner_2"};
 
     private Optional<BlockPos> buildingPos = Optional.empty();
     private ResourceLocation buildingStructureName;
@@ -39,6 +38,8 @@ public class Modifiger extends AbstractIllager {
     public AnimationState idleAnimationState = new AnimationState();
     public AnimationState buildingAnimationState = new AnimationState();
     private int idleCooldown;
+    private int buildCooldown;
+    private int buildCount;
     public Modifiger(EntityType<? extends Modifiger> p_32105_, Level p_32106_) {
         super(p_32105_, p_32106_);
         this.xpReward = 20;
@@ -47,8 +48,7 @@ public class Modifiger extends AbstractIllager {
     protected void registerGoals() {
         super.registerGoals();
         this.goalSelector.addGoal(0, new FloatGoal(this));
-        this.goalSelector.addGoal(1, new MakeSpawningGoal(this, 0.75F));
-        this.goalSelector.addGoal(2, new ConstructGoal(this, STRUCTURE_LOCATIONS, 0.8F));
+        this.goalSelector.addGoal(1, new ConstructGoal(this, STRUCTURE_LOCATIONS, 0.8F));
 
         this.goalSelector.addGoal(2, new RaiderOpenDoorGoal(this));
         this.goalSelector.addGoal(3, new HoldGroundAttackGoal(this, 10.0F));
@@ -118,6 +118,22 @@ public class Modifiger extends AbstractIllager {
         this.buildingStructureName = buildingStructureName;
     }
 
+    public int getBuildCooldown() {
+        return buildCooldown;
+    }
+
+    public void setBuildCooldown(int buildCooldown) {
+        this.buildCooldown = buildCooldown;
+    }
+
+    public int getBuildCount() {
+        return buildCount;
+    }
+
+    public void setBuildCount(int buildCount) {
+        this.buildCount = buildCount;
+    }
+
     public boolean isAlliedTo(Entity p_33314_) {
         if (super.isAlliedTo(p_33314_)) {
             return true;
@@ -142,6 +158,8 @@ public class Modifiger extends AbstractIllager {
                 this.idleAnimationState.stop();
             }
             this.buildingAnimationState.animateWhen(this.getPose() == Pose.SITTING, this.tickCount);
+        } else if (this.getBuildCooldown() > 0) {
+            this.setBuildCooldown(this.buildCooldown - 1);
         }
         super.tick();
     }
@@ -157,6 +175,8 @@ public class Modifiger extends AbstractIllager {
         if (this.getBuildingPos().isPresent()) {
             p_37870_.put("BuildingPos", NbtUtils.writeBlockPos(this.getBuildingPos().get()));
         }
+        p_37870_.putInt("BuildCount", this.buildCount);
+        p_37870_.putInt("BuildCooldown", this.buildCooldown);
 
         if (this.buildingStructureName != null) {
             p_37870_.putString("BuildingName", this.buildingStructureName.toString());
@@ -175,6 +195,14 @@ public class Modifiger extends AbstractIllager {
         }
         if (p_37862_.contains("BuildingStep")) {
             this.setBuildingStep(p_37862_.getInt("BuildingStep"));
+        }
+
+        if (p_37862_.contains("BuildingCount")) {
+            this.setBuildCount(p_37862_.getInt("BuildingCount"));
+        }
+
+        if (p_37862_.contains("BuildingCooldown")) {
+            this.setBuildCooldown(p_37862_.getInt("BuildingCooldown"));
         }
     }
 
