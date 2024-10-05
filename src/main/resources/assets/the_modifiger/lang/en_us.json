@@ -3,6 +3,8 @@
   "block.the_modifiger.arrow_spawner": "Arrow Spawner",
   "block.the_modifiger.arrow_spawner.desc1": "Interact with Arrow",
   "block.the_modifiger.arrow_spawner.desc2": "Set Spawn Arrow",
+  "block.the_modifiger.dark_oak_scaffolding": "Dark Oak Scaffolding",
+  "block.the_modifiger.dark_oak_scaffolding_sand": "Dark Oak Scaffolding",
   "item.the_modifiger.modifiger_spawn_egg": "Modifiger Spawn Egg",
   "entity.the_modifiger.modifiger": "Modifiger"
 }

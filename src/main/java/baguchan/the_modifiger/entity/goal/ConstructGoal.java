@@ -1,6 +1,7 @@
 package baguchan.the_modifiger.entity.goal;
 
 import baguchan.the_modifiger.entity.Modifiger;
+import baguchan.the_modifiger.registry.ModBlocks;
 import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.BlockPos;
@@ -62,7 +63,7 @@ public class ConstructGoal extends Goal {
     public boolean canUse() {
         if (this.mob.getBuildCount() < 3 && this.mob.getTarget() != null && this.mob.getBuildCooldown() <= 0) {
             if (this.mob.getBuildingPos().isEmpty() && this.mob.hasActiveRaid()) {
-                if (this.mob.level() instanceof ServerLevel serverLevel && serverLevel.isCloseToVillage(this.mob.blockPosition(), 2)) {
+                if (this.mob.level() instanceof ServerLevel serverLevel) {
                     this.mob.setBuildCooldown(600 + this.mob.getRandom().nextInt(600));
                     this.mob.setBuildingPos(Optional.of(this.mob.blockPosition()));
                 }
@@ -86,10 +87,12 @@ public class ConstructGoal extends Goal {
 
         ResourceLocation resourceLocation = ResourceLocation.tryParse(structures[i]);
 
+        boolean flag = false;
         if (this.mob.getBuildingStructureName() != null) {
             resourceLocation = this.mob.getBuildingStructureName();
             this.step = this.mob.getBuildingStep();
         } else {
+            flag = true;
             this.mob.setBuildingStructureName(resourceLocation);
         }
 
@@ -102,12 +105,19 @@ public class ConstructGoal extends Goal {
         StructurePlaceSettings structureplacesettings = (new StructurePlaceSettings()).setRotation(rotation).addProcessor(BlockIgnoreProcessor.STRUCTURE_BLOCK).setIgnoreEntities(false).setFinalizeEntities(true).setBoundingBox(boundingbox).setRandom(this.mob.getRandom());
         Vec3i vec3i = structuretemplate.getSize(rotation);
         this.templateSettings = structureplacesettings;
-
+        this.rotation = rotation;
         BlockPos blockpos1 = new BlockPos(-vec3i.getX() / 2, 0, -vec3i.getZ() / 2);
         BlockPos blockpos2 = new BlockPos(vec3i.getX() / 2, vec3i.getY(), vec3i.getZ() / 2);
 
         this.maxPos = blockpos2;
-        this.rotation = rotation;
+        if (flag) {
+            BlockPos blockpos3 = this.mob.getBuildingPos().get().offset(-vec3i.getX() / 2, 0, -vec3i.getZ() / 2);
+
+            BlockPos blockpos4 = blockpos3.offset(vec3i.getX(), vec3i.getY(), vec3i.getZ());
+
+            this.mob.addBuildingBoundingBox(new BoundingBox(blockpos3.getX(), blockpos3.getY(), blockpos3.getZ(), blockpos4.getX(), blockpos4.getY(), blockpos4.getZ()));
+        }
+
         this.mob.setPose(Pose.SITTING);
     }
 
@@ -146,60 +156,73 @@ public class ConstructGoal extends Goal {
                 if (--this.buildingTick < 0) {
                     if (currentBlockPos != null) {
                         if (isReplaceable(serverLevel.getBlockState(currentBlockPos), serverLevel, mob)) {
-                                if (blockState != null && !blockState.isAir() && blockState.getFluidState().isEmpty()) {
-                                    SoundType soundType = blockState.getSoundType();
-                                    serverLevel.playSound(null, currentBlockPos, soundType.getPlaceSound(), SoundSource.BLOCKS, soundType.getVolume(), blockState.getSoundType().getPitch());
-                                }
-                                BlockState realState = blockState.mirror(templateSettings.getMirror()).rotate(templateSettings.getRotation());
 
-                                Block.pushEntitiesUp(serverLevel.getBlockState(currentBlockPos), realState, serverLevel, currentBlockPos);
+                            BlockState originalState = serverLevel.getBlockState(currentBlockPos);
 
-                                if (compoundTag != null) {
-                                    BlockEntity blockentity = serverLevel.getBlockEntity(currentBlockPos);
-                                    Clearable.tryClear(blockentity);
-                                    serverLevel.setBlock(currentBlockPos, Blocks.BARRIER.defaultBlockState(), 20);
-                                }
-
-                                if (serverLevel.setBlock(currentBlockPos, realState, 3)) {
-                                    list3.add(Pair.of(currentBlockPos, compoundTag));
-                                    if (compoundTag != null) {
-                                        BlockEntity blockentity1 = serverLevel.getBlockEntity(currentBlockPos);
-
-                                        if (blockentity1 != null) {
-                                            if (blockentity1 instanceof RandomizableContainerBlockEntity) {
-                                                compoundTag.putLong("LootTableSeed", serverLevel.random.nextLong());
-                                            }
-
-                                            blockentity1.load(compoundTag);
-                                            blockentity1.setChanged();
-                                        }
-                                    }
-
-                                    for (Pair<BlockPos, CompoundTag> pair : list3) {
-                                        BlockPos blockpos4 = pair.getFirst();
-                                        BlockState blockstate2 = serverLevel.getBlockState(blockpos4);
-                                        BlockState blockstate3 = Block.updateFromNeighbourShapes(blockstate2, serverLevel, blockpos4);
-                                        if (blockstate2 != blockstate3) {
-                                            serverLevel.setBlock(blockpos4, blockstate3, 3 & -2 | 16);
-                                        }
-                                        serverLevel.blockUpdated(blockpos4, blockstate3.getBlock());
-
-
-                                        if (pair.getSecond() != null) {
-                                            BlockEntity blockentity2 = serverLevel.getBlockEntity(blockpos4);
-                                            if (blockentity2 != null) {
-                                                blockentity2.setChanged();
-                                            }
-                                        }
-                                    }
-                                }
-
-
-                                currentBlockPos = null;
-                            } else {
-                                currentBlockPos = null;
+                            if (blockState != null && !blockState.isAir()) {
+                                SoundType soundType = blockState.getSoundType();
+                                serverLevel.playSound(null, currentBlockPos, soundType.getPlaceSound(), SoundSource.BLOCKS, soundType.getVolume(), blockState.getSoundType().getPitch());
                             }
+                            BlockState realState = blockState.mirror(templateSettings.getMirror()).rotate(templateSettings.getRotation());
+
+                            if (!originalState.isAir()) {
+                                if (originalState.is(BlockTags.DIRT)) {
+                                    realState = ModBlocks.DARK_OAK_SCAFFOLD.get().defaultBlockState();
+                                } else if (originalState.is(Blocks.SAND)) {
+                                    realState = ModBlocks.DARK_OAK_SCAFFOLD_SAND.get().defaultBlockState();
+                                } else {
+                                    serverLevel.destroyBlock(currentBlockPos, true);
+                                }
+                            }
+
+                            Block.pushEntitiesUp(originalState, realState, serverLevel, currentBlockPos);
+
+                            if (compoundTag != null) {
+                                BlockEntity blockentity = serverLevel.getBlockEntity(currentBlockPos);
+                                Clearable.tryClear(blockentity);
+                                serverLevel.setBlock(currentBlockPos, Blocks.BARRIER.defaultBlockState(), 20);
+                            }
+
+                            if (serverLevel.setBlock(currentBlockPos, realState, 3)) {
+                                list3.add(Pair.of(currentBlockPos, compoundTag));
+                                if (compoundTag != null) {
+                                    BlockEntity blockentity1 = serverLevel.getBlockEntity(currentBlockPos);
+
+                                    if (blockentity1 != null) {
+                                        if (blockentity1 instanceof RandomizableContainerBlockEntity) {
+                                            compoundTag.putLong("LootTableSeed", serverLevel.random.nextLong());
+                                        }
+
+                                        blockentity1.load(compoundTag);
+                                        blockentity1.setChanged();
+                                    }
+                                }
+
+                                for (Pair<BlockPos, CompoundTag> pair : list3) {
+                                    BlockPos blockpos4 = pair.getFirst();
+                                    BlockState blockstate2 = serverLevel.getBlockState(blockpos4);
+                                    BlockState blockstate3 = Block.updateFromNeighbourShapes(blockstate2, serverLevel, blockpos4);
+                                    if (blockstate2 != blockstate3) {
+                                        serverLevel.setBlock(blockpos4, blockstate3, 3 & -2 | 16);
+                                    }
+                                    serverLevel.blockUpdated(blockpos4, blockstate3.getBlock());
+
+
+                                    if (pair.getSecond() != null) {
+                                        BlockEntity blockentity2 = serverLevel.getBlockEntity(blockpos4);
+                                        if (blockentity2 != null) {
+                                            blockentity2.setChanged();
+                                        }
+                                    }
+                                }
+                            }
+
+
+                            currentBlockPos = null;
+                        } else {
+                            currentBlockPos = null;
                         }
+                    }
                     this.buildingTick = 1;
 
                 }
